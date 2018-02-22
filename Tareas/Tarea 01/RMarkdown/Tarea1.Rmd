@@ -1,3 +1,9 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
 <!-- R Markdown supports html syntax -->
 <!-- <div> -->
 <!--   Bernardo Mondragon 143743 -->
@@ -10,7 +16,7 @@
 
 ---
 title: "Tarea 1"
-author: "Bernardo Mondragón Brozon 143743, Karen Delgado Curiel, Juan Casas Alatriste Rion, David Almog Salama Finkelstein 136731"
+author: "Karen Delgado Curiel 142252, Bernardo Mondragón Brozon 143743, Juan Casas Alatriste Rion 141913, David Almog Salama Finkelstein 136731"
 date: "08/02/2018"
 output: html_document
 ---
@@ -108,7 +114,7 @@ scatter.plot + y.bar.plot + x.bar.plot + RTO.plot + labels + xlim(0,240)
 La recta de regresión lineal por el origen está dada por la siguiente ecuación:
 
 $$y=`r slope2()`x.$$
-Note que en el modelo de regresión por el origen la recta de regresión no pasa por el centroide $(\bar{x},\bar{y})$. En el modelo de regresión lineal simple se calculó la recta que mejor se ajusta a los datos, sin embargo, tiene sentido penser en un modelo de regresión lineal por el origen, pues es imposible que una persona cuyo peso es cero tenga una presión sistólica positiva e igual `r intercept`.
+Note que en el modelo de regresión por el origen la recta de regresión no pasa por el centroide $(\bar{x},\bar{y})$. En el modelo de regresión lineal simple se calculó la recta que mejor se ajusta a los datos, sin embargo, tiene sentido penser en un modelo de regresión lineal por el origen, pues es imposible que una persona cuyo peso es cero tenga una presión sistólica positiva e igual `r intercept`. Por otro lado, el modelo de regresión lineal simple es mejor porque produce estimadores insesgados.  
 
 ## Intervalos de predicción
 
@@ -152,7 +158,7 @@ Demuestre que en regresión múltiple los valores ajustados y los intervalos de pr
   \hat{Y}_0 &= (XS)((XS)^´(XS)^{-1})(XS)^´Y  \\
             &= XS(S^´X^´XS)^{-1}S^´XY \\
             &= X(X^´X)^{-1}XY \\
-            &= HY
+            &= HY \\
 \end{align}
 
 Por lo tanto los valores ajustados siguien siendo los mismos. Del mismo modo se tiene que el intervalo 
@@ -162,3 +168,9 @@ $$ \hat{\beta}_0+\hat{\beta}_1x_0 \pm \tau_{n-2,\frac{\alpha}{2}}\sqrt{MS_{res}(
 coincide con el intervalo
 
 $$ \hat{\beta}_0+\hat{\beta}_1x_0 \pm \tau_{n-2,\frac{\alpha}{2}}\sqrt{MS_{res}(1+x_0^´(X^´X)^{-1}x_0)}.  $$
+
+Si se quiere que la variable regresora $X$ ahora esté medida en centímetros ($cm$) en lugar de pulgadas ($''$), entonces la matriz no singular $S$ tendría el siguiente aspecto:
+$$S = \begin{bmatrix}
+    1 & 0 \\
+    0 & 2.54
+\end{bmatrix}.\blacksquare $$
