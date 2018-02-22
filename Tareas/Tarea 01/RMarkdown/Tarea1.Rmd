@@ -1,0 +1,164 @@
+<!-- R Markdown supports html syntax -->
+<!-- <div> -->
+<!--   Bernardo Mondragon 143743 -->
+<!-- </div> -->
+<!-- <div style="text-align: center;"> -->
+<!--   <h3>Tarea 1</h3> -->
+<!-- </div> -->
+
+<!-- See R Markdown docs  -->
+
+---
+title: "Tarea 1"
+author: "Bernardo Mondragón Brozon 143743, Karen Delgado Curiel, Juan Casas Alatriste Rion, David Almog Salama Finkelstein 136731"
+date: "08/02/2018"
+output: html_document
+---
+
+<!-- Specify global chunk options -->
+<!-- See documentation for this chunk options https://yihui.name/knitr/options/#code-evaluation -->
+```{r setup, include=FALSE }
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+library("ggplot2")
+```
+
+## Los datos
+
+Se cuenta con el peso, en libras, y la presión sistólica de 26 personas. En este análisis, la presión seá la variable de respuesta y el peso será la varuable regresora o predictora. A continuación se muestra el aspecto que tiene la información de las 26 personas.
+
+
+```{r data, echo=FALSE }
+datos <- read.csv("../Data/datos_peso_y_presion.csv", header=TRUE, sep = ",", quote = "\"", dec = ".")
+datos$peso <- as.numeric(as.character(datos$peso))
+datos$presion <- as.numeric(as.character(datos$presion))
+head(datos)
+
+```
+## Regresión lineal simple
+
+A continuación se muestra un diagrama de dispersión y la recta que mejor se ajusta a los datos.
+
+```{r pressure, echo=FALSE}
+# Hacer la regresion.
+datos.lm = lm(presion ~ peso, data=datos)
+# Extraer los coeficientes de regresion.
+coeffs = coefficients(datos.lm);
+intercept <- as.numeric(coeffs[1])
+slope <- as.numeric(coeffs[2])
+# Ecuacion de regresion lineal.
+mean_given_x <- function(x) intercept + x * slope
+# X bar 
+x.bar <- function() {
+  sum <- 0
+  for (i in 1:length(datos$peso)) {
+    sum = sum + datos$peso[i]    
+  }
+  sum/length(datos$peso)
+}
+# Y bar 
+y.bar <- function() {
+  sum <- 0
+  for (i in 1:length(datos$presion)) {
+    sum = sum + datos$presion[i]    
+  }
+  sum/length(datos$presion)
+}
+# Grafica de dispersion y recta de regresion.
+# See ggplot2 documentation: http://ggplot2.tidyverse.org/index.html.
+scatter.plot <- ggplot(data=datos, mapping=aes(x=peso, y=presion)) + geom_point()
+y.bar.plot <- geom_hline(aes(yintercept=y.bar()))
+x.bar.plot <- geom_vline(aes(xintercept=x.bar()))
+OLS.plot <- stat_function(fun = mean_given_x)
+labels <- labs(x="Peso (x)", y="Presion (y)")
+scatter.plot + y.bar.plot + x.bar.plot + OLS.plot + labels
+```
+
+La recta de regresión está dada por 
+
+$$ y=`r slope`x+`r intercept`$$
+y el punto en donde la recta horizontal intersecta con la recta vertical es el centroide $(\bar{x},\bar{y})$.
+
+
+## Regresión lineal por el origen
+
+A continuación se muestra un diagrama de dispersión y la recta de regresion lineal por el orgen que mejor se ajusta a los datos.
+
+```{r myChunkName, include=FALSE}
+slope2 <- function() {
+  sum.of.products <- 0
+  sum.of.squares <- 0
+  for (i in 1:length(datos$peso)) {
+    xi <- datos$peso[i]
+    yi <- datos$presion[i]
+    sum.of.products <- sum.of.products + xi*yi
+    sum.of.squares <- sum.of.squares + xi*xi
+  }
+  sum.of.products/sum.of.squares
+}
+slope2()
+```
+
+```{r grafica de regresion lineal por el origen, echo = FALSE}
+RTO.line <- function(x) x*slope2()
+RTO.plot <- stat_function(fun = RTO.line)
+scatter.plot + y.bar.plot + x.bar.plot + RTO.plot + labels + xlim(0,240)
+```
+
+La recta de regresión lineal por el origen está dada por la siguiente ecuación:
+
+$$y=`r slope2()`x.$$
+Note que en el modelo de regresión por el origen la recta de regresión no pasa por el centroide $(\bar{x},\bar{y})$. En el modelo de regresión lineal simple se calculó la recta que mejor se ajusta a los datos, sin embargo, tiene sentido penser en un modelo de regresión lineal por el origen, pues es imposible que una persona cuyo peso es cero tenga una presión sistólica positiva e igual `r intercept`.
+
+## Intervalos de predicción
+
+El intervalo de predicción para una persona que $122lb$ es el siguiente:
+
+```{r intervalo de prediccion, echo=FALSE} 
+B0 <- intercept
+B1 <- slope
+x <- 122
+alpha <- 0.05
+n <- length(datos$peso)
+percentile <- qt(alpha/2,n-2)
+SSres <- 0
+for (i in 1:length(datos$peso)) {
+  SSres <- SSres + (datos$presion[i]-(B0+datos$peso[i]*B1))^2
+}
+MSres <- SSres/(n-2)
+Xbar <- 0
+for (i in 1:length(datos$peso)) {
+  Xbar <- Xbar + datos$peso[i]/n
+}
+Sxx <- 0
+for (i in 1:length(datos$peso)) {
+  Sxx <- Sxx + (datos$peso[i]-Xbar)^2
+}
+lim.inf <- B0 + B1*x + percentile*sqrt(MSres*(1+(1/n)+((x-Xbar)/(Sxx))))
+lim.sup <- B0 + B1*x - percentile*sqrt(MSres*(1+(1/n)+((x-Xbar)/(Sxx))))
+```
+
+
+$$\hat{\beta}_0+\hat{\beta}_1x \pm\tau_{n-2,\frac{\alpha}{2}}\sqrt{\frac{\sum_{i=1}^{n}\left(y_i-[\hat{\beta}_0+\hat{\beta}_1x_i]\right)^2}{n-2}\left(1+\frac{1}{n}+\frac{x-\bar{x}}{\sum_{i=1}^{n}\left(x_i-\bar{x}\right)^2}\right)} = (`r lim.inf`,`r lim.sup`)$$
+
+## Problema teórico
+
+Demuestre que en regresión múltiple los valores ajustados y los intervalos de predicción no se alteran si la matriz de diseño se post-multiplica por una matriz S no singular. Diga como sería esta matriz en el caso de regresión simple en donde el regresor X está medido en pulgadas y se quiere que el resultado de la postmultiplicación sea que X se mide ahora en cm.
+
+#### Demostración
+ Sea $X$ la matriz de diseño y sea $S$ una matriz no singular. Los valores ajustados del modelo $Y=X*S*\beta$ están dados por
+ 
+\begin{align}
+  \hat{Y}_0 &= (XS)((XS)^´(XS)^{-1})(XS)^´Y  \\
+            &= XS(S^´X^´XS)^{-1}S^´XY \\
+            &= X(X^´X)^{-1}XY \\
+            &= HY
+\end{align}
+
+Por lo tanto los valores ajustados siguien siendo los mismos. Del mismo modo se tiene que el intervalo 
+
+$$ \hat{\beta}_0+\hat{\beta}_1x_0 \pm \tau_{n-2,\frac{\alpha}{2}}\sqrt{MS_{res}(1+Sx_0^´((SX)^´SX)^{-1}Sx_0)}  $$
+
+coincide con el intervalo
+
+$$ \hat{\beta}_0+\hat{\beta}_1x_0 \pm \tau_{n-2,\frac{\alpha}{2}}\sqrt{MS_{res}(1+x_0^´(X^´X)^{-1}x_0)}.  $$

@@ -1,0 +1,82 @@
+---
+title: "Estadistica Aplicada 2 - Tarea 1"
+author: "Cristina Torres, Antonio Sosa, Maria Jose Chavez"
+date: "21 de febrero de 2017"
+output: word_document
+---
+
+a) A partir del archivo BP, el cual  contiene datos de 26 personas (peso (lb), presión sistólica), se ajustó un modelo de regresión simple. Se tomó la presión como la variable dependiente y el peso como la independiente.
+
+```{r setup, include=FALSE}
+datos <- read.csv("../Data/datos_peso_y_presion.csv", header=TRUE, sep = ",", quote = "\"", dec = ".")
+datos1 = datos
+datos1$peso<- as.character(datos1$peso)
+datos1$peso<- as.numeric(datos1$peso)
+datos1$presion<- as.character(datos1$presion)
+datos1$presion<- as.numeric(datos1$presion)
+datos1
+```
+
+Posteriormente, sacamos el peso y la presion promedio y se procedió a realizar la estimación de nuestros regresores.
+
+```{r, echo=FALSE}
+Pres.prom<-mean(datos1$presion)
+Pes.prom<-mean(datos1$peso)
+A=0
+B=0
+for (i in 1:26){ 
+  A=((datos1$presion[i]-Pres.prom)*(datos1$peso[i]-Pes.prom))+A
+  B=((datos1$peso[i]-Pes.prom)^2)+B
+}
+B1.hat=A/B
+B0.hat=Pres.prom-(Pes.prom*B1.hat)
+print(paste("Beta0 es igual a",B0.hat))
+print(paste("Beta1 es igual a",B1.hat))
+```
+
+Por último, se graficaron los datos y la recta que incorpora a los regresores estimados.
+
+```{r}
+plot(datos1)
+Recta<- abline(B0.hat,B1.hat)
+```
+
+b. Después se realizó una regresión lineal simple por el origen, asumiendo beta0=0 y se procedió a estimar de nueva manera beta1.
+
+```{r, echo=FALSE}
+C=0
+for (i in 1:26){
+   C=(datos1$Presion[i]/datos1$Peso[i])+C  
+}
+n=length(datos1$Presion)
+B1.hat1=C/n
+print(paste("Beta1* es igual a",B1.hat1))
+```
+
+De igual manera, se graficaron los datos y la recta que incorpora a los nuevos regresores estimados.
+
+```{r, echo=FALSE}
+plot(datos1)
+Recta2<-abline(0,B1.hat1)
+```
+
+Después de realizar los dos modelos, podemos notar que el modelo de RLS es mejor ya que se puede observar una menor variabilidad total que el modelo de RLS por el origen.
+
+c. Finalmente, se calculó un intervalo de predicción para una persona que pesa 122 lb. Para ello, se estimo la varianza residual con la variable MSres y se obtuvieron los siguientes intBervalos:
+
+```{r, echo=FALSE}
+D=0
+for (i in 1:26){
+  D=((datos1$Presion[i]-(B0.hat+B1.hat*datos1$Peso[i]))^2)+D
+}
+SSres=D
+MSres=SSres/(n-2)
+Sxx=
+alfa=0.05
+IP1=B0.hat+(B1.hat*122)+(qt(alfa/2,n-2)*sqrt(MSres*(1+(1/n)+(((122-Pes.prom)^2)/Sxx))))
+IP0=B0.hat+(B1.hat*122)-(qt(alfa/2,n-2)*sqrt(MSres*(1+(1/n)+(((122-Pes.prom)^2)/Sxx))))
+IP<-c(IP1,IP0)
+print(paste("El límite inferior del intervalo de predicción es igual a ",IP1))
+print(paste("El límite superior del intervalo de predicción es igual a ",IP0))
+
+```
