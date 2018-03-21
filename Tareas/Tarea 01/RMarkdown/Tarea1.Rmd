@@ -2,8 +2,8 @@
 output:
   pdf_document: default
   html_document: default
-  word_document: default
 ---
+
 <!-- R Markdown supports html syntax -->
 <!-- <div> -->
 <!--   Bernardo Mondragon 143743 -->
@@ -154,22 +154,23 @@ Demuestre que en regresión múltiple los valores ajustados y los intervalos de pr
 #### Demostración
  Sea $X$ la matriz de diseño y sea $S$ una matriz no singular. Los valores ajustados del modelo $Y=X*S*\beta$ están dados por
  
-\begin{align}
-  \hat{Y}_0 &= (XS)((XS)^´(XS)^{-1})(XS)^´Y  \\
-            &= XS(S^´X^´XS)^{-1}S^´XY \\
-            &= X(X^´X)^{-1}XY \\
-            &= HY \\
-\end{align}
+$$\begin{aligned}
+  \hat{Y}_0 &= (XS)((XS)^T(XS)^{-1})(XS)^TY  \\
+            &= XS(S^TX^TXS)^{-1}S^TXY \\
+            &= X(X^TX)^{-1}XY \\
+            &= HY
+\end{aligned}.$$
 
 Por lo tanto los valores ajustados siguien siendo los mismos. Del mismo modo se tiene que el intervalo 
 
-$$ \hat{\beta}_0+\hat{\beta}_1x_0 \pm \tau_{n-2,\frac{\alpha}{2}}\sqrt{MS_{res}(1+Sx_0^´((SX)^´SX)^{-1}Sx_0)}  $$
+$$\hat{\beta}_0+\hat{\beta}_1x_0\pm\tau_{n-2,\frac{\alpha}{2}}\sqrt{MS_{res}(1+Sx_0^`((SX)^`SX)^{-1}Sx_0)}$$
 
 coincide con el intervalo
 
-$$ \hat{\beta}_0+\hat{\beta}_1x_0 \pm \tau_{n-2,\frac{\alpha}{2}}\sqrt{MS_{res}(1+x_0^´(X^´X)^{-1}x_0)}.  $$
+$$\hat{\beta}_0+\hat{\beta}_1x_0\pm\tau_{n-2,\frac{\alpha}{2}}\sqrt{MS_{res}(1+x_0^`(X^`X)^{-1}x_0)}.$$
 
 Si se quiere que la variable regresora $X$ ahora esté medida en centímetros ($cm$) en lugar de pulgadas ($''$), entonces la matriz no singular $S$ tendría el siguiente aspecto:
+
 $$S = \begin{bmatrix}
     1 & 0 \\
     0 & 2.54
