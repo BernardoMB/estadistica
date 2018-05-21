@@ -1,0 +1,165 @@
+---
+title: "Tarea 5"
+author: "Bernardo Mondragón 143743, Karen Delgado 142252, Juan Casas 141913, David Almog 136731"
+date: "May 20, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Para seleccionar el mejor modelo
+# install.packages("leaps")
+library(leaps)
+
+# 
+# install.packages("olsrr")
+library(olsrr)
+
+# RSTUDENT
+#install.packages("car")
+library(car)
+
+#install.packages("MASS")
+library(MASS)
+
+```
+
+\section{Primera parte}
+
+\subsection{i) Obtenga todas las regresiones posibles y escoja una de acuerdo al criterio Cp de Mallow’s}
+
+Corriendo todas las regresiones posibles se obtiene el siguiente output que indica cual es el mejor modelo dependiendo el numero de regresores:
+
+```{r 1, echo=FALSE}
+data <- read.csv("Demographic.csv",sep=",")
+
+data <- data.frame(
+  data$M,
+  data$POP,
+  data$UR,
+  data$IN,
+  data$PR,
+  data$CR,
+  data$PI,
+  data$PL,
+  data$BL,
+  data$SP,
+  data$AI,
+  data$MH,
+  data$RP
+)
+names <- c(
+  "M",
+  "POP",
+  "UR",
+  "IN",
+  "PR",
+  "CR",
+  "PI",
+  "PL",
+  "BL",
+  "SP",
+  "AI",
+  "MH",
+  "RP"
+)
+names(data) <- names
+
+x <- model.matrix(M ~ . - 1, data=data)
+y <- data$M
+
+bestmods.cp <- leaps(x, y, nbest=1, names=names[2:length(names)], method=c("Cp"))
+bestmods.cp
+```
+
+Segun el output obtenido, el mejor modelo que contiene $1$ regresor esta dado por el modelo que contiene unicamente a la variable $PI$, el mejor modelo que contiene $2$ regresores el modelo que contiene unicamente a las variables $PI$  y $SP$ y asi sucesivamente. 
+
+De acuerdo al criterio $C_p$ de Mallows, el mejor modelo, de entre todos los posibles modelo es el modelo que contiene $4$ variables e incluye unicamente a los regresores $POP$, $UR$, $PI$ y $PL$.
+
+\subsection{ii) Diga si la que escogió sería tambien un buen candidato en terminos de $R^2$}
+
+Haciendo lo mismo que en la pregunta anterior, pero esta vez escojiendo como criterio el valor de $R^2$ se ontiene el siguinete output:
+```{r 2, echo=FALSE}
+bestmods.r2 <- leaps(x, y, nbest=1, names=names[2:length(names)], method=c("r2"))
+#max(bestmods.r2$r2)
+bestmods.r2
+```
+
+Esto indica que el mejor modelo es el que tiene el mayor numero de regresores. En este caso, el mejor modelo no coincide con el mejor modelo si se utilizara el criterio $C_p$ de Mallows.
+
+\subsection{iii) Para el modelo escogido indique si existen:}
+
+Observaciones atípicas en el espacio de las x’s:
+
+```{r, echo=FALSE}
+boxplot(data$POP, main="Poblacion total")
+boxplot(data$UR, main="Poblacion urbana")
+boxplot(data$PI, main="Tasa de prisioneros")
+boxplot(data$PL, main="Porcentaje de pobres")
+```
+
+
+
+Observaciones atípicas en el espacio de las y's (observaciones a las que no se les ajusta bien un modelo que se ajustó a las otras, esto es, RSTUDENT alto):
+
+Se obtienen los siguientes valores:
+
+```{r, echo=FALSE}
+model <- lm(M ~ data$POP+
+            data$UR+
+            data$PI+
+            data$PL, data=data)
+outlierTest(model)
+```
+
+
+Observaciones influyentes (DFFITS):
+
+Para el modelo seleccionado a travez del criterio de Mallows se obtiene el siguinete grafico:
+
+```{r 3, echo=FALSE}
+ols_plot_dffits(model)
+```
+
+\subsection{iv) Intente explicar porqué son atípicos los estados que encontró en el punto anterior, si es que encontró alguno. Por ejemplo: gran población, etc.}
+
+Creemos que la observacion $33$ correspondiente al estado de Nevada es un valor atipico debido a que en este estado hay una alta tasa de prisioneros.
+
+\subsection{V) Obtenga una gráfica de probabilidad normal de los RSTUDENT y coméntela}
+
+```{r, echo=FALSE}
+sresid <- studres(model)
+hist(sresid, freq=FALSE,
+   main="Distribution of Studentized Residuals")
+xfit<-seq(min(sresid),max(sresid),length=40)
+yfit<-dnorm(xfit)
+lines(xfit, yfit)
+```
+
+Es muy parecida a la distribucion normal estandar.
+
+\subsection{vi) Deje fuera un estado tomado al azar, corra su modelo y obtenga un intervalo de predicción ($95\%$) para su tasa de asesinatos. ¿Es satisfactorio este intervalo? ¿Cuál hubiera sido su predictor si no hubiera usado los regresores y sólo las tasas de los otros edos.? ¿se ganó algo con la regresión?}
+
+\subsection{vii) Con el objeto de  contrastar la hipotesis de que ser un estado fronterizo con Mexico influye en la tasa de asesinatos se introduce en el modelo una variable indicadora que vale 1 si el estado es fronterizo ¿Es su coeficiente significativo?.
+Compare este resultado con la simple prueba de dos muestras aplicada a los estados fronterizos versus los que no lo son. Comente los resultados}
+
+```{r, echo=FALSE}
+
+# California, arizona, nuevo mexico y texas
+data2 <- read.csv("Demographic2.csv",sep=",")
+model2 <- lm(M ~ data2$POP+
+            data2$UR+
+            data2$PI+
+            data2$PL+
+              data2$COL, data=data2)
+summary(model2)
+```
+Por lo tanto no se tiene un coeficiente significativo.
+
+Corriendo la regresion con los estados que son 
+
+
+\subsection{viii) En el modelo del inciso anterior indique si hay problemas de multicolinealidad y en caso afirmativo diga cuáles son las variable involucradas.}
+
+\section{Segunda parte}

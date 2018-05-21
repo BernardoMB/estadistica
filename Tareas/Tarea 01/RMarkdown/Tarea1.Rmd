@@ -80,7 +80,7 @@ labels <- labs(x="Peso (x)", y="Presion (y)")
 scatter.plot + y.bar.plot + x.bar.plot + OLS.plot + labels
 ```
 
-La recta de regresión está dada por 
+La recta de regresión está dada por $`r slope`$
 
 $$ y=`r slope`x+`r intercept`$$
 y el punto en donde la recta horizontal intersecta con la recta vertical es el centroide $(\bar{x},\bar{y})$.
